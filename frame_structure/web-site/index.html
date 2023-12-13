@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV Upload and Visualization</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body class="m-6">
+
+    <div id="message-container" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-75 p-4 rounded text-white text-center hidden">
+        <!-- 这里放置消息内容 -->
+    </div>
+    
+    
+    
+      
+    <div class="m-6">
+        <h1 class="text-1xl md:text-2xl lg:text-3xl font-bold text-center mb-8 text-blue-600 shadow-lg p-3 rounded-lg bg-gray-100">
+            D值法自动计算网页小程序
+        </h1>
+
+        <div class="flex">
+            <!-- 左侧区域 -->
+            <div class="bg-white py-8 border border-gray-300 w-1/3 pr-4 flex items-center justify-center">
+                <div class="w-full">
+                    <h3 class="text-lg font-semibold mb-3 text-center">上传文件</h3>
+                    <!-- 上传文件的内容 -->
+                    <form id="uploadForm" class="flex flex-col items-center">
+                        <input type="file" id="csvFile" accept=".csv" class="mb-3 p-2 border border-gray-300">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">
+                            上传并计算
+                        </button>
+                    </form>
+                    <div class="border-t border-gray-300 mt-4 pt-4">
+                        <h3 class="text-lg font-semibold mb-3 text-center">案例文件下载</h3>
+                        <a href="kj.csv" download="案例文件.csv" class="text-blue-500 hover:underline text-center">下载案例文件</a>
+                        <div class="mt-4">
+                            <p class="text-sm">文件格式说明</p>
+                            <ul class="list-disc list-inside ml-4">
+                                <li class="text-sm my-1">node字段：节点名称，x坐标，y坐标</li>
+                                <li class="text-sm my-1">element字段：杆件名称，弹性模量，截面积，惯性矩</li>
+                                <li class="text-sm my-1">BC字段：节点名称（支座）</li>
+                                <li class="text-sm my-1">force字段：水平力所在楼层，水平力大小</li>
+                            </ul>
+                        </div>
+                                              
+                        
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧区域 -->
+            <div class="bg-white py-8 border border-gray-300 w-2/3 flex items-center justify-center">
+                <div class="w-full">
+                    <h3 class="text-lg font-semibold mb-3 text-center">弯矩图</h3>
+                    <!-- 弯矩图的内容 -->
+                    <div class="grid place-items-center mb-4">
+                        <svg id="momentDiagram" width="500" height="350"></svg>
+                    </div>
+                    <!-- 加减键 -->
+                    <div class="text-center">
+                        <button id="increaseButton" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded mr-2" style="border: none;">+</button>
+                        <button id="decreaseButton" class="bg-gray-400 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded" style="border: none;">-</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 下方区域 -->
+        <div class="container mx-auto px-4 py-8 mt-4">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold mb-3 text-center">表格结果</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table-auto border-collapse border w-full">
+                    <thead>
+                        <tr>
+                            <th class="border p-2">轴号 ID</th>
+                            <th class="border p-2">楼层</th>
+                            <th class="border p-2">层高(m)</th>
+                            <th class="border p-2">i</th>
+                            <th class="border p-2">alpha_c</th>
+                            <th class="border p-2">v</th>
+                            <th class="border p-2">D(kN/m)</th>
+                            <th class="border p-2">Vim(kN)</th>
+                            <th class="border p-2">Mc_u(kN·m)</th>
+                            <th class="border p-2">Mc_d(kN·m)</th>
+                            <th class="border p-2">Mb_l(kN·m)</th>
+                            <th class="border p-2">Mb_r(kN·m)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- 表格内容将在这里生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 在页面底部添加 footer -->
+    <footer>
+        <p class="text-sm text-gray-600 mr-2">BY Asionm # 2023</p>
+        <p class="text-sm text-gray-600">
+            <a href="https://github.com/your-github-repo" class="footer-link">点击查看源码</a>
+        </p>
+    </footer>
+    
+    <style>
+        /* 添加样式以固定 footer 在底部 */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to right, rgba(229, 235, 237, 0.9), #53d057); /* 左到右的绿色渐变背景色 */
+            text-align: center;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999; /* 如果页面上有其他元素遮挡了 footer，可以使用 z-index 提高层级 */
+        }
+    
+        /* 样式化链接 */
+        .footer-link {
+            color: #6b1eaa; /* 设置链接颜色 */
+            text-decoration: none; /* 去掉链接下划线 */
+            margin-left: 10px; /* 添加链接之间的间距 */
+        }
+    </style>
+
+</body>
+
+
+    <script>
+
+        let nodesData = []
+        let svg = d3.select("#momentDiagram");
+        let amp = 20
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            const fileField = document.getElementById('csvFile');
+
+            formData.append('file', fileField.files[0]);
+
+            fetch('http://127.0.0.1:5000/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if(result.code===200) {
+
+                    // 成功消息
+                    showMessage('计算成功', true);
+
+                    nodesData = result.data;
+                    drawPic(svg, amp)
+                    //表格代码
+                    tableData = result.table
+                    // 获取表格的 tbody 元素
+                    const tbody = document.getElementById('table-body');
+                    // 循环遍历数据并将每一行添加到表格中
+                    tableData.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        // 创建单元格并设置数据，使用 toFixed(2) 来保留两位小数
+                        const keys = ['轴号id', '楼层', '层高', 'i', 'alpha_c', 'v', 'D', 'Vim', 'M_c_up', 'M_c_down', 'M_b_left', 'M_b_right'];
+                        keys.forEach(key => {
+                            const cell = document.createElement('td');
+                            const value = rowData[key];
+                            
+                            if (key === '轴号id' || key === '楼层') {
+                                cell.textContent = parseInt(value);
+                            } else {
+                                cell.textContent = typeof value === 'number' ? value.toFixed(2) : value;
+                            }
+                            cell.classList.add('text-center'); // 添加 text-center 类以使文本内容居中
+                            row.appendChild(cell);
+                        });
+                        // 将整行添加到 tbody 中
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    // 失败消息
+                    showMessage(result.msg, false);
+                }
+                
+
+
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        // 获取增加和减少按钮的元素
+        const increaseButton = document.getElementById('increaseButton');
+        const decreaseButton = document.getElementById('decreaseButton');
+
+        function drawPic(svg, amp) {
+                    const width = +svg.attr("width");
+                    const height = +svg.attr("height");
+                    
+                    const padding = { top: height*0.1, right: width*0.1, bottom: height*0.1, left: width*0.1 };
+                    // 创建比例尺来调整节点位置
+                    const xScale = d3.scaleLinear()
+                                    .domain([0, d3.max(nodesData, d => d.x)])
+                                    .range([padding.left, 0.8*width]);
+                    const yScale = d3.scaleLinear()
+                                    .domain([0, d3.max(nodesData, d => d.y)])
+                                    .range([ 0.9*height, padding.top]);
+                    // 绘制节点
+                    svg.selectAll(".node")
+                    .data(nodesData)
+                    .enter().append("circle")
+                    .attr("class", "node")
+                    .attr("cx", d => xScale(d.x))
+                    .attr("cy", d => yScale(d.y))
+                    .attr("r", 5)
+                    .attr("fill", "blue");
+
+                    // 绘制节点名称
+                    svg.selectAll(".label")
+                    .data(nodesData)
+                    .enter().append("text")
+                    .attr("x", d => xScale(d.x))
+                    .attr("y", d => yScale(d.y))
+                    .text(d => d.name)
+                    .attr("font-size", "15px")
+                    .attr("dx", "5px")
+                    .attr("dy", "-5px");
+
+                    // 绘制连接线
+                    nodesData.forEach(node => {
+                        Object.entries(node.link).forEach(([direction, linkedNodeName]) => {
+                            if (linkedNodeName && linkedNodeName !== 'fixed') {
+                                const linkedNode = nodesData.find(n => n.name === linkedNodeName);
+                                svg.append("line")
+                                .attr("x1", xScale(node.x))
+                                .attr("y1", yScale(node.y))
+                                .attr("x2", xScale(linkedNode.x))
+                                .attr("y2", yScale(linkedNode.y))
+                                .attr("stroke", "black")
+                                .attr("stroke-width", 2);
+                            }
+                        });
+                    });
+
+                    nodesData.forEach(node => {
+                        Object.entries(node.link).forEach(([direction, linkedNodeName]) => {
+                            if (linkedNodeName && linkedNodeName !== 'fixed') {
+                                const linkedNode = nodesData.find(n => n.name === linkedNodeName);
+
+                                // 计算角度
+                                let dx = linkedNode.x - node.x;
+                                let dy = linkedNode.y - node.y;
+                                let theta = Math.atan2(dy, dx);
+
+                                // 通过弯矩值和角度计算线的偏移
+                                let momentValue = node['moment'][direction];
+                                let nextMomentValue = linkedNode['moment'][oppositeDirection(direction)];
+                                let m1_x = node.x + (momentValue * Math.cos(theta + Math.PI / 2) / 1000 * amp); // 20为放大因子
+                                let m1_y = node.y + (momentValue * Math.sin(theta + Math.PI / 2) / 1000 * amp);
+                                let m2_x = linkedNode.x - (nextMomentValue * Math.cos(theta + Math.PI / 2) / 1000 * amp);
+                                let m2_y = linkedNode.y - (nextMomentValue * Math.sin(theta + Math.PI / 2) / 1000 * amp);
+
+                                // 绘制连接线
+                                svg.append("line")
+                                    .attr("x1", xScale(node.x))
+                                    .attr("y1", yScale(node.y))
+                                    .attr("x2", xScale(linkedNode.x))
+                                    .attr("y2", yScale(linkedNode.y))
+                                    .attr("stroke", "black");
+
+                                // 绘制弯矩线
+                                svg.append("line")
+                                    .attr("x1", xScale(node.x))
+                                    .attr("y1", yScale(node.y))
+                                    .attr("x2", xScale(m1_x))
+                                    .attr("y2", yScale(m1_y))
+                                    .attr("stroke", "red");
+
+                                svg.append("line")
+                                    .attr("x1", xScale(m1_x))
+                                    .attr("y1", yScale(m1_y))
+                                    .attr("x2", xScale(m2_x))
+                                    .attr("y2", yScale(m2_y))
+                                    .attr("stroke", "red");
+
+                                svg.append("line")
+                                    .attr("x1", xScale(m2_x))
+                                    .attr("y1", yScale(m2_y))
+                                    .attr("x2", xScale(linkedNode.x))
+                                    .attr("y2", yScale(linkedNode.y))
+                                    .attr("stroke", "red");
+
+                                // 绘制弯矩值标签
+                                let labelPosition = offsetLabelPosition(node.x, node.y, theta + Math.PI / 2);
+                                svg.append("text")
+                                    .attr("x", xScale(labelPosition[0]))
+                                    .attr("y", yScale(labelPosition[1]))
+                                    .text(Math.abs(momentValue).toFixed(2))
+                                    .attr("font-size", "6px")
+                                    .attr("fill", "blue");
+
+                                labelPosition = offsetLabelPosition(linkedNode.x, linkedNode.y, theta - Math.PI / 2);
+                                svg.append("text")
+                                    .attr("x", xScale(labelPosition[0]))
+                                    .attr("y", yScale(labelPosition[1]))
+                                    .text(Math.abs(nextMomentValue).toFixed(2))
+                                    .attr("font-size", "6px")
+                                    .attr("fill", "blue");
+                            }
+                        });
+                    });
+
+                }
+
+        function oppositeDirection(direction) {
+            return {
+                'up': 'down',
+                'down': 'up',
+                'left': 'right',
+                'right': 'left'
+            }[direction];
+        }
+
+        function offsetLabelPosition(x, y, theta, offset = 1) {
+            return [x + offset * Math.cos(theta), y + offset * Math.sin(theta)];
+        }
+
+        // 添加点击事件监听器
+        increaseButton.addEventListener('click', () => {
+            // 增加按钮点击事件的逻辑
+            amp += 2; // 增加 amp
+            // 清空SVG内容
+            svg.selectAll("*").remove();
+            drawPic(svg, amp); // 重新绘制图形
+        });
+
+        decreaseButton.addEventListener('click', () => {
+             // 减少按钮点击事件的逻辑
+            amp -= 2; // 减少 amp
+            // 清空SVG内容
+            svg.selectAll("*").remove();
+            drawPic(svg, amp); // 重新绘制图形
+        });
+
+
+        function showMessage(message, isSuccess = true) {
+            const messageContainer = document.getElementById('message-container');
+            const messageElement = document.createElement('div');
+            messageElement.textContent = message;
+
+            if (isSuccess) {
+                messageElement.classList.add('text-green-500'); // 设置成功消息的样式
+            } else {
+                messageElement.classList.add('text-red-500'); // 设置失败消息的样式
+            }
+
+            messageContainer.appendChild(messageElement);
+
+            // 显示消息
+            messageContainer.classList.remove('hidden');
+
+            // 设置一个定时器，一段时间后自动隐藏消息
+            setTimeout(() => {
+                messageContainer.removeChild(messageElement);
+                // 隐藏消息
+                messageContainer.classList.add('hidden');
+            }, 3000); // 3秒后隐藏消息
+        }
+
+    </script>
+</body>
+</html>
