@@ -29,5 +29,10 @@ def upload_file():
         except Exception as e:
             return jsonify({"code": 500, "msg": '文件格式存在问题，暂时无法处理12层以上结构！'})
 
+@app.route('/test')
+def ttt():
+    return jsonify({'test': 'test'})
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

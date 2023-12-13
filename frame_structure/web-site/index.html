@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>CSV Upload and Visualization</title>
+    <title>D值法自动计算网页小程序</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
@@ -103,7 +103,7 @@
     <footer>
         <p class="text-sm text-gray-600 mr-2">BY Asionm # 2023</p>
         <p class="text-sm text-gray-600">
-            <a href="https://github.com/your-github-repo" class="footer-link">点击查看源码</a>
+            <a href="https://github.com/Asionm/structure-design" class="footer-link">点击查看源码</a>
         </p>
     </footer>
     
@@ -148,7 +148,7 @@
 
             formData.append('file', fileField.files[0]);
 
-            fetch('http://127.0.0.1:5000/upload', {
+            fetch('https://asionm.pythonanywhere.com/upload', {
                 method: 'POST',
                 body: formData
             })
@@ -165,6 +165,8 @@
                     tableData = result.table
                     // 获取表格的 tbody 元素
                     const tbody = document.getElementById('table-body');
+                    // 清除 tbody 中现有的所有行
+                    tbody.innerHTML = '';
                     // 循环遍历数据并将每一行添加到表格中
                     tableData.forEach(rowData => {
                         const row = document.createElement('tr');
