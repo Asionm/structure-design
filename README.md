@@ -36,7 +36,7 @@
 
 演示网页位于：https://asionm.github.io/structure-design/
 
-![2023-12-13 18-33-38 00_00_02-00_00_25](https://github.com/Asionm/structure-design/blob/main/README.assets/2023-12-13 18-33-38 00_00_02-00_00_25.gif)
+![demo](https://github.com/Asionm/structure-design/blob/main/README.assets/demo.gif)
 
 *注意：程序尚未完善，因此只能输入简单的结构与受力情况，且层数不能超过12层。*
 
