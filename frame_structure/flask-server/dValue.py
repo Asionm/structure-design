@@ -274,13 +274,13 @@ class D_value_method:
 
 #为了更加方便对比几种数据所以这里改为了函数
 def ins(fhand):
-    print(fhand)
     nodes = dict()
     elems = dict()
     bc = list()
     load = dict()
     for line in fhand:
         line = re.split(",", line)
+        line = [item.replace('\ufeff', '').replace('\n', '') for item in line]
         if line[0] == 'node':
             nodes[line[1]] = Node(line[1], float(line[2]), float(line[3]))
         elif line[0] == 'element':
