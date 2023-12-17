@@ -139,6 +139,8 @@
         let nodesData = []
         let svg = d3.select("#momentDiagram");
         let amp = 20
+        const url = 'https://asionm.pythonanywhere.com/upload'
+        //const url = 'http://127.0.0.1:5000/upload'
 
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -147,8 +149,8 @@
             const fileField = document.getElementById('csvFile');
 
             formData.append('file', fileField.files[0]);
-
-            fetch('https://asionm.pythonanywhere.com/upload', {
+            
+            fetch(url, {
                 method: 'POST',
                 body: formData
             })
@@ -205,6 +207,8 @@
         const decreaseButton = document.getElementById('decreaseButton');
 
         function drawPic(svg, amp) {
+                    // 清空SVG内容
+                    svg.selectAll("*").remove();
                     const width = +svg.attr("width");
                     const height = +svg.attr("height");
                     
@@ -258,18 +262,23 @@
                             if (linkedNodeName && linkedNodeName !== 'fixed') {
                                 const linkedNode = nodesData.find(n => n.name === linkedNodeName);
 
-                                // 计算角度
-                                let dx = linkedNode.x - node.x;
-                                let dy = linkedNode.y - node.y;
-                                let theta = Math.atan2(dy, dx);
+                        // 计算角度
+                        let dx = linkedNode.x - node.x;
+                        let dy = linkedNode.y - node.y;
+                        let theta = Math.atan2(dy, dx);
 
-                                // 通过弯矩值和角度计算线的偏移
-                                let momentValue = node['moment'][direction];
-                                let nextMomentValue = linkedNode['moment'][oppositeDirection(direction)];
-                                let m1_x = node.x + (momentValue * Math.cos(theta + Math.PI / 2) / 1000 * amp); // 20为放大因子
-                                let m1_y = node.y + (momentValue * Math.sin(theta + Math.PI / 2) / 1000 * amp);
-                                let m2_x = linkedNode.x - (nextMomentValue * Math.cos(theta + Math.PI / 2) / 1000 * amp);
-                                let m2_y = linkedNode.y - (nextMomentValue * Math.sin(theta + Math.PI / 2) / 1000 * amp);
+                        // 判断杆件是竖直还是水平的
+                        const isHorizontal = Math.abs(theta) < 1e-6 || Math.abs(theta - Math.PI) < 1e-6 || Math.abs(theta + Math.PI) < 1e-6;
+                        const directionMultiplier = isHorizontal ? -1 : 1;
+
+                        // 通过弯矩值和角度计算线的偏移
+                        let momentValue = directionMultiplier * (node['moment'][direction] ?? 0);
+                        let nextMomentValue = directionMultiplier * (linkedNode['moment'][oppositeDirection(direction)] ?? 0);
+                        let m1_x = node.x + (momentValue * Math.cos(theta + Math.PI / 2) / 1000 * amp); // 20为放大因子
+                        let m1_y = node.y + (momentValue * Math.sin(theta + Math.PI / 2) / 1000 * amp);
+                        let m2_x = linkedNode.x - (nextMomentValue * Math.cos(theta + Math.PI / 2) / 1000 * amp);
+                        let m2_y = linkedNode.y - (nextMomentValue * Math.sin(theta + Math.PI / 2) / 1000 * amp);
+
 
                                 // 绘制连接线
                                 svg.append("line")
