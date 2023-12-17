@@ -311,7 +311,7 @@
                                     .attr("stroke", "red");
 
                                 // 绘制弯矩值标签
-                                let labelPosition = offsetLabelPosition(node.x, node.y, theta + Math.PI / 2);
+                                let labelPosition = offsetLabelPosition(node.x, node.y, theta + Math.PI / 2, directionMultiplier);
                                 svg.append("text")
                                     .attr("x", xScale(labelPosition[0]))
                                     .attr("y", yScale(labelPosition[1]))
@@ -319,7 +319,7 @@
                                     .attr("font-size", "6px")
                                     .attr("fill", "blue");
 
-                                labelPosition = offsetLabelPosition(linkedNode.x, linkedNode.y, theta - Math.PI / 2);
+                                labelPosition = offsetLabelPosition(linkedNode.x, linkedNode.y, theta - Math.PI / 2, directionMultiplier);
                                 svg.append("text")
                                     .attr("x", xScale(labelPosition[0]))
                                     .attr("y", yScale(labelPosition[1]))
@@ -341,8 +341,8 @@
             }[direction];
         }
 
-        function offsetLabelPosition(x, y, theta, offset = 1) {
-            return [x + offset * Math.cos(theta), y + offset * Math.sin(theta)];
+        function offsetLabelPosition(x, y, theta, offset = 1, direction_multiplier=1) {
+            return [x + offset * Math.cos(theta), y + direction_multiplier*offset * Math.sin(theta)];
         }
 
         // 添加点击事件监听器
