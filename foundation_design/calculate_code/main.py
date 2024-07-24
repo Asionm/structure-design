@@ -5,13 +5,13 @@ from generate import generateContent
 pile_foundation = Foundation()
 
 params = {
-    'column_size': (0.9, 0.88),
+    'column_size': (1.2, 0.88),
     'cap_materials': {
-                    'concrete': 'C40',
-                    'steel': 'HRB400'
+                    'concrete': 'C60',
+                    'steel': 'HRB500'
                 },
     'fd_materials': {
-                        'concrete': 'C40',
+                        'concrete': 'C50',
                         'steel': 'HRB400'
                     },
     'stratigraphic_info': [
@@ -83,102 +83,11 @@ params = {
     'underwater_depth': (7+10.8)/2,
     'force': {'Fk':7123,'Mk':74,'Hk':83},
     'pile_length': 19,
-    'pile_size': (0.65, 0.65)
+    'pile_size': (1.2, 1.2)
 }
 
 
-params_test = {
-    'column_size': (0.9, 0.85),
-    'cap_materials': {
-                    'concrete': 'C40',
-                    'steel': 'HRB500'
-                },
-    'fd_materials': {
-                        'concrete': 'C40',
-                        'steel': 'HRB500'
-                    },
-    'stratigraphic_info': [
-    {
-        'name': '素填土',
-        'thickness': 5.4,
-        'gama': 18.8,
-        'c': 10,
-        'phi': 15,
-        'qsk': 0.001,
-        'qpk': 0.001,
-        'Es': 3
-    },{
-        'name': '含砾粘土',
-        'thickness': 4.34,
-        'gama': 18.6,
-        'c': 20,
-        'phi': 15,
-        'qsk': 35,
-        'qpk': 0.001,
-        'Es': 5
-    },{
-        'name': '淤泥',
-        'thickness': 2.3,
-        'gama': 16.9,
-        'c': 4,
-        'phi': 6,
-        'qsk': 15,
-        'qpk': 0.001,
-        'Es': 2.5
-    },{
-        'name': '粘土',
-        'thickness': 2.99,
-        'gama': 18.4,
-        'c': 20,
-        'phi': 12,
-        'qsk': 20,
-        'qpk': 0.0001,
-        'Es': 4
-    },{
-        'name': '粗砂',
-        'thickness': 2.09,
-        'gama': 19.6,
-        'c': 0,
-        'phi': 25,
-        'qsk': 40,
-        'qpk': 0.00001,
-        'Es': 7
-    },{
-        'name': '砾质粘土',
-        'thickness': 7.89,
-        'gama': 19.8,
-        'c': 25,
-        'phi': 22,
-        'qsk':  35,
-        'qpk':  1800,
-        'Es': 6
-    },{
-        'name': '花岗岩',
-        'thickness': 4.44,
-        'gama': 28.0,
-        'c': 28.0,
-        'phi': 32,
-        'qsk':  70,
-        'qpk':  4000,
-        'Es': 7
-    },{
-        'name': '花岗岩1',
-        'thickness': 8.09,
-        'gama': 28.0,
-        'c': 35,
-        'phi': 45,
-        'qsk':  70,
-        'qpk':  5500,
-        'Es': 8
-    },
-],
-    'underwater_depth': (7+10.8)/2,
-    'force': {'Fk':7856,'Mk':78,'Hk':78},
-    'pile_length': 22,
-    'pile_size': (0.6, 0.6)
-}
-
-pile_foundation.auto_calc(params_test)
+pile_foundation.auto_calc(params)
 
 # 定义要填充的数据
 data = {
